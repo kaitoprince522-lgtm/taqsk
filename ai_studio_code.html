@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>مستكشف الطقس العالمي | Glassmorphism</title>
+    
+    <!-- CSS Styles -->
+    <style>
+        :root {
+            --glass: rgba(255, 255, 255, 0.12);
+            --glass-heavy: rgba(255, 255, 255, 0.2);
+            --border: rgba(255, 255, 255, 0.25);
+            --text: #ffffff;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+        }
+
+        body {
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: #1e1e2e url('https://images.unsplash.com/photo-1534088568595-a066f410bcda?q=80&w=1600') no-repeat center center fixed;
+            background-size: cover;
+            color: var(--text);
+            transition: background 1s ease-in-out;
+            padding: 20px;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 650px;
+            background: var(--glass);
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            border: 1px solid var(--border);
+            border-radius: 25px;
+            padding: 25px;
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.4);
+        }
+
+        /* البحث والأزرار */
+        .header-section {
+            margin-bottom: 25px;
+        }
+
+        .search-box {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .search-box input {
+            flex: 1;
+            background: var(--glass-heavy);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 12px 20px;
+            color: white;
+            outline: none;
+            font-size: 1rem;
+        }
+
+        .search-box input::placeholder { color: #ddd; }
+
+        .search-box button {
+            background: #00d2ff;
+            border: none;
+            border-radius: 12px;
+            width: 50px;
+            color: white;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        .search-box button:hover { background: #3a7bd5; transform: scale(1.05); }
+
+        .quick-cities {
+            display: flex;
+            gap: 8px;
+            overflow-x: auto;
+            padding-bottom: 8px;
+            scrollbar-width: thin;
+        }
+
+        .quick-cities button {
+            background: var(--glass-heavy);
+            border: 1px solid var(--border);
+            color: white;
+            padding: 6px 14px;
+            border-radius: 20px;
+            cursor: pointer;
+            white-space: nowrap;
+            font-size: 0.9rem;
+            transition: 0.3s;
+        }
+
+        .quick-cities button:hover { background: white; color: black; }
+
+        /* البطاقة الرئيسية */
+        .weather-main {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .weather-main h1 { font-size: 2.2rem; margin-bottom: 5px; }
+        .weather-main #date { opacity: 0.8; font-weight: 300; margin-bottom: 15px; }
+
+        .temp-display {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+            margin: 10px 0;
+        }
+
+        .temp-display img { width: 100px; filter: drop-shadow(2px 4px 6px rgba(0,0,0,0.2)); }
+        .temp-display h2 { font-size: 4.5rem; }
+
+        .description { font-size: 1.4rem; font-weight: 500; margin-bottom: 25px; text-transform: capitalize; }
+
+        /* تفاصيل إضافية */
+        .stats-row {
+            display: flex;
+            justify-content: space-around;
+            background: rgba(0, 0, 0, 0.2);
+            padding: 20px;
+            border-radius: 20px;
+            margin-bottom: 30px;
+        }
+
+        .stat-item { text-align: center; }
+        .stat-item i { font-size: 1.3rem; color: #00d2ff; margin-bottom: 8px; display: block; }
+        .stat-item span { font-size: 1.1rem; font-weight: bold; }
+        .stat-item p { font-size: 0.8rem; opacity: 0.7; margin-top: 4px; }
+
+        /* التوقعات */
+        .forecast-title { margin-bottom: 15px; font-weight: 400; font-size: 1.1rem; border-right: 4px solid #00d2ff; padding-right: 10px; }
+        
+        .forecast-grid {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 10px;
+        }
+
+        .forecast-card {
+            background: var(--glass-heavy);
+            padding: 12px 8px;
+            border-radius: 15px;
+            text-align: center;
+            border: 1px solid var(--border);
+            transition: 0.3s;
+        }
+
+        .forecast-card:hover { transform: translateY(-5px); background: rgba(255,255,255,0.3); }
+        .forecast-card p:first-child { font-size: 0.8rem; opacity: 0.9; }
+        .forecast-card img { width: 45px; }
+        .forecast-card .temp-max { font-weight: bold; display: block; }
+
+        /* التجاوب */
+        @media (max-width: 500px) {
+            .forecast-grid { grid-template-columns: repeat(3, 1fr); }
+            .forecast-card:nth-child(n+4) { display: none; }
+            .temp-display h2 { font-size: 3.5rem; }
+            .container { padding: 15px; }
+        }
+    </style>
+    
+    <!-- الأيقونات -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+
+    <div class="container">
+        <div class="header-section">
+            <div class="search-box">
+                <input type="text" id="cityInput" placeholder="ابحث عن عاصمة أو مدينة عالمية...">
+                <button id="searchBtn"><i class="fas fa-search"></i></button>
+            </div>
+            
+            <div class="quick-cities">
+                <button onclick="getWeather('London')">لندن</button>
+                <button onclick="getWeather('Paris')">باريس</button>
+                <button onclick="getWeather('New York')">نيويورك</button>
+                <button onclick="getWeather('Tokyo')">طوكيو</button>
+                <button onclick="getWeather('Dubai')">دبي</button>
+                <button onclick="getWeather('Riyadh')">الرياض</button>
+                <button onclick="getWeather('Berlin')">برلين</button>
+            </div>
+        </div>
+
+        <main id="weatherDisplay">
+            <div class="weather-main">
+                <h1 id="cityName">جاري التحميل...</h1>
+                <p id="date"></p>
+                
+                <div class="temp-display">
+                    <img id="weatherIcon" src="" alt="">
+                    <h2 id="temp">--°</h2>
+                </div>
+                <p class="description" id="description">--</p>
+            </div>
+
+            <div class="stats-row">
+                <div class="stat-item">
+                    <i class="fas fa-droplet"></i>
+                    <span id="humidity">--%</span>
+                    <p>الرطوبة</p>
+                </div>
+                <div class="stat-item">
+                    <i class="fas fa-wind"></i>
+                    <span id="wind">-- كم/س</span>
+                    <p>الرياح</p>
+                </div>
+                <div class="stat-item">
+                    <i class="fas fa-gauge-high"></i>
+                    <span id="pressure">--</span>
+                    <p>الضغط الجوي</p>
+                </div>
+            </div>
+
+            <h3 class="forecast-title">توقعات 5 أيام قادمة</h3>
+            <div class="forecast-grid" id="forecast">
+                <!-- يتم التوليد بالـ JS -->
+            </div>
+        </main>
+    </div>
+
+    <!-- JavaScript Logic -->
+    <script>
+        const apiKey = "6bc4be69a1f1621e51b3f95ae634ef05";
+        const cityInput = document.getElementById('cityInput');
+        const searchBtn = document.getElementById('searchBtn');
+
+        // 1. تحديد الموقع التلقائي
+        window.onload = () => {
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(
+                    pos => getWeatherByCoords(pos.coords.latitude, pos.coords.longitude),
+                    () => getWeather('London') 
+                );
+            } else {
+                getWeather('London');
+            }
+        };
+
+        async function getWeatherByCoords(lat, lon) {
+            const url = `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=${apiKey}&units=metric&lang=ar`;
+            fetchData(url);
+        }
+
+        async function getWeather(city) {
+            const url = `https://api.openweathermap.org/data/2.5/weather?q=${city}&appid=${apiKey}&units=metric&lang=ar`;
+            fetchData(url);
+        }
+
+        async function fetchData(url) {
+            try {
+                const response = await fetch(url);
+                const data = await response.json();
+                if (data.cod === 200) {
+                    updateUI(data);
+                    getForecast(data.name);
+                } else {
+                    alert("عذراً، لم يتم العثور على المدينة!");
+                }
+            } catch (error) {
+                console.error("حدث خطأ في الاتصال بالخدمة");
+            }
+        }
+
+        function updateUI(data) {
+            document.getElementById('cityName').innerText = data.name;
+            document.getElementById('temp').innerText = `${Math.round(data.main.temp)}°`;
+            document.getElementById('description').innerText = data.weather[0].description;
+            document.getElementById('humidity').innerText = `${data.main.humidity}%`;
+            document.getElementById('wind').innerText = `${data.wind.speed} كم/س`;
+            document.getElementById('pressure').innerText = data.main.pressure;
+            document.getElementById('weatherIcon').src = `https://openweathermap.org/img/wn/${data.weather[0].icon}@4x.png`;
+            
+            const dateOptions = { weekday: 'long', day: 'numeric', month: 'long' };
+            document.getElementById('date').innerText = new Date().toLocaleDateString('ar-EG', dateOptions);
+
+            updateBackground(data.weather[0].main);
+        }
+
+        async function getForecast(city) {
+            const url = `https://api.openweathermap.org/data/2.5/forecast?q=${city}&appid=${apiKey}&units=metric&lang=ar`;
+            const response = await fetch(url);
+            const data = await response.json();
+            
+            const forecastGrid = document.getElementById('forecast');
+            forecastGrid.innerHTML = '';
+
+            // تصفية البيانات (نأخذ القراءة التي تظهر في منتصف اليوم)
+            const dailyData = data.list.filter(item => item.dt_txt.includes("12:00:00"));
+
+            dailyData.forEach(day => {
+                const dayName = new Date(day.dt * 1000).toLocaleDateString('ar-EG', { weekday: 'short' });
+                forecastGrid.innerHTML += `
+                    <div class="forecast-card">
+                        <p>${dayName}</p>
+                        <img src="https://openweathermap.org/img/wn/${day.weather[0].icon}.png">
+                        <span class="temp-max">${Math.round(day.main.temp)}°</span>
+                    </div>
+                `;
+            });
+        }
+
+        function updateBackground(condition) {
+            const body = document.body;
+            let bgUrl = "";
+
+            const bgs = {
+                Clear: "https://images.unsplash.com/photo-1506466010722-395aa2bef877?q=80&w=1600",
+                Clouds: "https://images.unsplash.com/photo-1534088568595-a066f410bcda?q=80&w=1600",
+                Rain: "https://images.unsplash.com/photo-1519692938311-58752002f47c?q=80&w=1600",
+                Snow: "https://images.unsplash.com/photo-1478265409131-1f65c88f965c?q=80&w=1600",
+                Thunderstorm: "https://images.unsplash.com/photo-1605727281914-5089204c670a?q=80&w=1600",
+                Drizzle: "https://images.unsplash.com/photo-1541919329513-35f7af297129?q=80&w=1600"
+            };
+
+            bgUrl = bgs[condition] || "https://images.unsplash.com/photo-1504608524841-42fe6f032b4b?q=80&w=1600";
+            body.style.backgroundImage = `url('${bgUrl}')`;
+        }
+
+        searchBtn.addEventListener('click', () => {
+            if(cityInput.value) getWeather(cityInput.value);
+        });
+
+        cityInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter' && cityInput.value) getWeather(cityInput.value);
+        });
+    </script>
+</body>
+</html>
